@@ -33,10 +33,8 @@ class OnePluginMediaController extends Controller
 
     public function actionIndex()
     {
-
         $url = "one-plugin-media/settings";
         return $this->redirect($url);
-
     }
 
     public function actionImageEdit(): Response

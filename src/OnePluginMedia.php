@@ -103,6 +103,17 @@ class OnePluginMedia extends Plugin
         return $navItem;
     }
 
+    /**
+     * Redirect to OnePlugin Fields settings
+     *
+     * @return $this|mixed|Response
+     */
+    public function getSettingsResponse()
+    {
+        $url = UrlHelper::cpUrl('one-plugin-media/settings');
+        return Craft::$app->getResponse()->redirect($url);
+    }
+
     protected function createSettingsModel()
     {
         return new Settings();
@@ -112,10 +123,8 @@ class OnePluginMedia extends Plugin
     {
 
         Event::on(UrlManager::class, UrlManager::EVENT_REGISTER_CP_URL_RULES, function(RegisterUrlRulesEvent $event) {
-
             $event->rules['one-plugin-media/'] = 'one-plugin-media/one-plugin-media/index';
             $event->rules['one-plugin-media/default'] = 'one-plugin-media/one-plugin-media/index';
-
             $event->rules['one-plugin-media/settings'] = 'one-plugin-media/settings/index';
             $event->rules['one-plugin-media/settings/sync'] = 'one-plugin-media/settings/sync';
             $event->rules['one-plugin-media/settings/save-settings'] = 'one-plugin-media/settings/save-settings';
