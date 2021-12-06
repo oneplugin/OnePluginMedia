@@ -1,0 +1,52 @@
+{
+    "name": "oneplugin/one-plugin-media",
+    "description": "Build a Craft CMS site with one field!",
+    "type": "craft-plugin",
+    "version": "1.0.0",
+    "keywords": [
+        "craft",
+        "cms",
+        "craftcms",
+        "craft-plugin",
+        "onepluginmedia",
+        "oneplugin"
+    ],
+    "support": {
+        "docs": "https://github.com/oneplugin/OnePluginMedia/blob/master/README.md",
+        "issues": "https://github.com/oneplugin/OnePluginMedia/issues"
+    },
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "OnePlugin",
+            "homepage": "https://oneplugin.co/"
+        }
+    ],
+    "minimum-stability": "dev",
+    "prefer-stable": true,
+    "require": {
+        "craftcms/cms": "^3.0.0"
+    },
+    "require-dev": {
+      "craftcms/cms": "^3.2.0",
+      "codeception/codeception": "^3.0",
+      "vlucas/phpdotenv": "^3.0"
+    },
+    "autoload": {
+        "psr-4": {
+          "oneplugin\\onepluginmedia\\": "src/"
+        }
+    },
+    "extra": {
+        "name": "OnePlugin Media",
+        "handle": "one-plugin-media",
+        "developer": "OnePlugin",
+        "developerUrl": "https://github.com/oneplugin/",
+        "documentationUrl": "https://github.com/oneplugin/OnePluginMedia/blob/master/README.md",
+        "changelogUrl": "https://raw.githubusercontent.com/oneplugin/OnePluginMedia/master/CHANGELOG.md",
+        "components": {
+            "onePluginMediaService": "oneplugin\\onepluginmedia\\services\\OnePluginMediaService"
+        },
+        "class": "oneplugin\\onepluginmedia\\OnePluginMedia"
+    }
+}

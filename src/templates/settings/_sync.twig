@@ -1,0 +1,131 @@
+{% extends "one-plugin-media/_layouts/settings" %}
+{% set selectedSubnavItem = 'content-sync' %}
+{% import "_includes/forms" as forms %}
+
+{% set title = "Content Sync "|t("one-plugin-media") %}
+
+{% block actionButton %}
+
+{% endblock %}
+
+{% block content %}
+<div class="field">
+    <div class="heading">
+        <label for="pluginName" id="pluginName-label">
+
+        </label>
+    </div>
+    <div class="instructions" id="pluginName-instructions">
+        <p>
+            Current version
+        </p>
+    </div>
+    <div class="animatedicon-color">
+        <strong>{{ formatted_version }}</strong>
+    </div>
+
+    <div style="margin-top:20px;">
+        <input id="check-for-update" class="btn dashed" type="button" value="Check for updates"> <span class="info op-m-tooltip" style="vertical-align: middle !important;"><span class="tooltips">Latest content updates can be downloaded without having to reinstall OnePlugin Media. <p>If an update is available, Download now button will appear.</p></span></span>
+        </input>
+    </div>
+
+    <div id="message" style="margin-top:30px;">
+        <div>
+            <span id="latest-version"></span>
+        </div>
+        <input style="margin-top:15px;" class="hidden btn dashed" id="update-content" class="btn" type="button" value="Download now">
+        </input>
+    </div>
+</div>
+{%  endblock %}
+{% set contentJS %}
+
+    if (document.readyState === "interactive" || document.readyState === "complete") {
+        onePluginMediaDOMLoaded();
+    } else {
+        document.addEventListener("DOMContentLoaded", onePluginMediaDOMLoaded, true);
+    }
+    function onePluginMediaDOMLoaded() {
+        $('#check-for-update').click(function(){
+            var _this = this;
+            $(this).prop('disabled', true);
+            $(this).addClass('spinner');
+            $(this).val('');
+            $.ajax({
+                type: "get",
+                url: Craft.getActionUrl('one-plugin-media/settings/check-for-updates', { }),
+                data: [],
+                success: function (response) {
+                    $(_this).prop('disabled', false);
+                    $(_this).removeClass('spinner');
+                    $(_this).val('Check for updates');
+
+                    if(response['updates'] ==  false){
+                        $('#latest-version').html('Currently there are no updates');
+                    }
+                    else{
+                        $('#latest-version').html('Updates are available - Latest Version Number : <b>' + response['latest_version'] + '</b>');
+                        $('#update-content').removeClass('hidden');
+                    }
+                },
+                error: function (XMLHttpRequest, textStatus) {
+                    console.log("Status: " + textStatus);
+                    $(_this).prop('disabled', false);
+                    $(_this).removeClass('spinner');
+                    $(_this).val('Check for updates');
+                    $('#latest-version').html('Currently there are no updates');
+                }
+            });
+        });
+
+
+        $('#update-content').click(function(){
+            var _this = this;
+            $(this).addClass('spinner');
+            $(this).val('');
+
+            $.ajax({
+                type: "get",
+                url: Craft.getActionUrl('one-plugin-media/settings/download-files', { }),
+                data: [],
+                success: function (response) {
+                    $(_this).removeClass('spinner');
+                    $(_this).val('Download now');
+                    if(response['success'] ==  true){
+                        reloadPageWithParam();
+                    }
+                    else{
+                        location.reload();
+                    }
+                },
+                error: function (XMLHttpRequest, textStatus) {
+                    console.log("Status: " + textStatus);
+                }
+            });
+        });
+    }
+    function reloadPageWithParam(){
+        var url = window.location.href;
+        if(!url.includes("success")){
+            url = url + "?success=1";
+        }
+        window.location.href = url;
+    }
+
+    function get(name){
+        if(name=(new RegExp('[?&]'+encodeURIComponent(name)+'=([^&]*)')).exec(location.search))
+            return decodeURIComponent(name[1]);
+    }
+
+    function startAnimation(){
+        party.confetti(document.querySelector("#page-container"), {
+            count: party.variation.range(20, 225),
+        });
+    }
+    $(document).ready(function(){
+        if( get("success") == "1"){
+            startAnimation();
+        }
+    });
+{% endset %}
+{% includeJs contentJS %}

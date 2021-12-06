@@ -1,0 +1,17 @@
+{% extends "_layouts/cp" %}
+
+{% set fullPageForm = true %}
+
+{% set crumbs = [
+    { label: settings.pluginName, url: url("one-plugin-media") },
+    { label: "Settings"|t("one-plugin-media"), url: url("one-plugin-media/settings") },
+]
+%}
+
+{% block actionButton %}
+    <div class="buttons">
+        <div class="btngroup submit">
+            <input type="submit" class="btn submit" value="{{ 'Save'|t('one-plugin-media') }}">
+        </div>
+    </div>
+{% endblock %}

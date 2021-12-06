@@ -1,0 +1,37 @@
+{# @var craft \craft\web\twig\variables\CraftVariable #}
+{#
+/**
+ * Animated Icons plugin for Craft CMS
+ *
+ * AnimatedIconsField Field Settings
+ *
+ * @author    Jugs
+ * @copyright Copyright (c) 2021 Jugs
+ * @link      https://oneplugin.co/
+ * @package   AnimatedIcons
+ * @since     1.0.0
+ */
+#}
+
+{% import "_includes/forms" as forms %}
+
+{{ 
+    forms.checkboxField({
+        label: 'This field is required'|t('one-plugin-media'),
+        id: 'mandatory-toggle',
+        name: 'mandatory',
+        class: 'use-single-folder-cb',
+        value: 1,
+        checked: field.mandatory
+    }) 
+}}
+
+{{ forms.checkboxSelectField({
+    label: "Allowed Content Types"|t('app'),
+    instructions: "Set the allowed content types for this field"|t('app'),
+    id: 'allowedContents',
+    name: 'allowedContents',
+    options: availableContents,
+    values: field.allowedContents,
+    showAllOption: true,
+}) }}

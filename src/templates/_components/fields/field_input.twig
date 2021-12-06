@@ -1,0 +1,105 @@
+{# @var craft \craft\web\twig\variables\CraftVariable #}
+{#
+/**
+ * Animated Icons plugin for Craft CMS 3.x
+ *
+ * AnimatedIconsField Field Input
+ *
+ * @author    Jugs
+ * @copyright Copyright (c) 2021 Jugs
+ * @link      https://oneplugin.co/
+ * @package   AnimatedIcons
+ * @since     1.0.0
+ */
+#}
+
+{% import "_includes/forms" as forms %}
+{% set jsClass = (jsClass is defined and jsClass ? jsClass : 'AnimatedIconSelectInput') -%}
+
+{% set csrfToken = {
+    csrfTokenName: craft.app.config.general.csrfTokenName,
+    csrfTokenValue: craft.app.request.csrfToken,
+} %}
+
+
+{{ forms.hidden({
+    name: name,
+    id: id,
+    value: fieldValue ? fieldValue.json : ''
+}) }}
+
+<div class="matrixblock">
+    <div class="titlebar">
+        <div class="blocktype"></div>
+        <div class="preview"></div>
+    </div>
+
+    <div class="op-select">
+        <div class="input-select">
+            <div class="select">
+                <select id="{{ id }}-select">
+                    {% if '*' in allowedContents or 'imageAsset' in allowedContents %}
+                        <option value="imageAsset">{{"Add Image"|t('one-plugin-media')}}</option>
+                    {% endif %}
+                    {% if '*' in allowedContents or 'svg' in allowedContents %}
+                        <option value="svg">{{"Add SVG Icon"|t('one-plugin-media')}}</option>
+                    {% endif %}
+                </select>
+            </div>
+        </div>
+
+        <div id="{{ id }}-image" class="op-select hidden">
+            <div class="elements">
+            </div>
+            <div class="flex">
+                <button type="button" class="btn add icon dashed">{{"Add Image"|t('one-plugin-media')}}</button>
+            </div>
+        </div>
+        <div id="{{ id }}-svg" class="op-select hidden">
+            <div class="elements">
+
+            </div>
+
+            <div class="flex">
+                <button type="button" class="btn add icon dashed" tabindex="0">{{"Add SVG Icon"|t('one-plugin-media')}}</button>
+            </div>
+        </div>
+
+        <div class="op-preview">
+            <p class="fullwidth"><strong>{{"Preview"|t('one-plugin-media')}}</strong></p>
+        </div>
+        {% set iconType,altText,siteId,assetId,name,assetUrl = '','','','','','' %}
+        {% set arrFieldValue = fieldValue ? fieldValue.iconData : [] %}
+        {% if arrFieldValue is not empty and arrFieldValue['type'] is defined %}
+            {% set iconType = arrFieldValue['type'] %}
+        {% endif %}
+        {% if iconType is not empty and iconType == 'imageAsset' %}
+            {% if arrFieldValue['alt'] is defined %}
+                {% set altText = arrFieldValue['alt'] %}
+            {% endif %}
+        {% endif %}
+        {% if arrFieldValue['siteId'] is defined %}
+            {% set siteId = arrFieldValue['siteId'] %}
+        {% endif %}
+        {% if arrFieldValue['id'] is defined %}
+            {% set assetId = arrFieldValue['id'] %}
+        {% endif %}
+        {% if arrFieldValue['name'] is defined %}
+            {% set name = arrFieldValue['name'] %}
+        {% endif %}
+        {% if arrFieldValue['asset'] is defined %}
+            {% set assetUrl = arrFieldValue['asset'] %}
+        {% endif %}
+        
+
+        <div id="{{ id }}-preview" class="op-icon-preview">
+            {% if iconType is not empty and (iconType == 'imageAsset') %}
+                {% set status = 'exists' %}
+                {% if asset is not defined or asset is null %} {% set status = 'deleted' %}{%endif%}
+                <div style="display:flex"><div class="element small hasthumb" data-type="craft\elements\Asset" data-alt="{{altText}}" data-status="{{status}}" data-site-id="{{ siteId }}" data-id="{{ assetId }}" data-title="{{ name }}" data-status="enabled" data-url="{{ assetUrl }}" data-editable=""><div class="elementthumb"> {{fieldValue.getThumbHtml()}} </div><div class="label"><span class="title">{{ name }}</span></div></div><a href="#" id="{{ id }}-remove" style="margin-top:6px;margin-left:10px;" class="delete icon" title="Remove"></a></div>
+            {% endif %}
+        </div>
+
+        <div id="{{ id }}-preview-map" class="hidden google-map"></div>
+    </div>
+</div>

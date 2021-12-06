@@ -1,0 +1,50 @@
+{% extends "_layouts/cp" %}
+{% set title = 'Welcome to OnePlugin Media!' %}
+{% set crumbs = [
+    { label: "OnePlugin Media", url: url('one-plugin-media') },
+    { label: "Welcome"|t, url: url('one-plugin-media/welcome') },
+] %}
+{% set assetsFolder = craft.app.getAssetManager().getPublishedUrl('@oneplugin/onepluginmedia/assetbundles/onepluginmedia/dist',true) %}
+{% block content %}
+<div class="pane" style="text-align: center;">
+    <one-plugin style="margin-bottom:60px;width:50vh;height:50vh;" stroke="20" colors="primary:#030e12,secondary:#5bccf6" trigger="loop" src="https://s3.ap-southeast-2.amazonaws.com/production.oneplugin.co/logo.json"></one-plugin>
+    <div>
+        <h2>You’re the best and you’re about to plug amazing into your life!</h2>
+        <p>OnePlugin allows you to dynamically switch content types and provides you with access to editable assets that work with you.</p>
+        <p>With one line of code and just three clicks you’re site will come to life. </p>
+        <p>We hope you love it! Would you like to know more? <a target="_blank" href="http://docs.oneplugin.co">Please see the documentation.</a></p>
+        <p>Brought to you by the OnePlugin team</p>            
+    </div>
+</div>
+
+<hr>
+{% endblock %}
+
+{% block actionButton %}{% endblock %}
+
+{% block foot %}
+    {{ view.registerJsFile(assetsFolder ~ '/js/party.min.js',{
+    depends: 'craft\\web\\assets\\cp\\CpAsset',
+    position:3
+}) }}
+    {{ view.registerJsFile(assetsFolder ~ '/js/onepluginfields-lottie.min.js',{
+    depends: 'craft\\web\\assets\\cp\\CpAsset',
+    position:3
+}) }}
+{% endblock %}
+
+{% set partyJS %}
+    $(document).ready(function(){
+
+        function startAnimation(){
+            party.confetti(document.querySelector("#page-container"), {
+                count: party.variation.range(20, 225),
+            });
+        }
+        startAnimation();
+        setTimeout(startAnimation,2000);
+        setTimeout(startAnimation,4000);
+
+    });
+{% endset %}
+{% includeJs partyJS %}

@@ -1,0 +1,110 @@
+
+<main data-variant="icons" id="page-icons-library">
+    <webdiv-library-layout class="slim-scrollbars">
+        <div id="container" class=" ">
+            <div class="sidebar">
+                <webdiv-library-sidebar>
+                    <div id="category-container">
+                        <div class="category"><strong>Choose category</strong></div>
+                        <div id="category-tree"></div>
+                    </div>
+                </webdiv-library-sidebar>
+            </div>
+            <div class="main">
+                <div class="body" style="padding: 0px !important;">
+                    <webdiv-library-icons actions="favorite" slot="main">
+                        <div id="container">
+                            <div id="iconlistarea">
+                                <div class="search-container">
+                                    <div class="op-search-input">
+                                        <span>Search:</span>
+                                        <input class="op-search-input text" id="search-icon-input" type="search" placeholder="keywords" style="cursor: zoom-out;">
+                                    </div>
+                                    <div class="op-search-icon">
+                                        <button type="button" class="btn-filter" tabindex="0">Search</button>    
+                                    </div>
+                                </div>
+                                <div class="icon-header">
+                                    <span id="cattitle"></span>
+                                    <slot name="actions"></slot>
+                                </div>
+                                <div class="icons">
+
+                                </div>
+                                <!--<div class="noicondiv">
+                                   <strong class="heading">No icons to show</strong>
+                                   <h2>Oppss, we can't find demanded icons</h2>
+                                   <a target="_blank" href="https://oneplugin.co" class="btn">Request new icon</a>
+                                </div>-->
+                            </div>
+                        </div>
+                    </webdiv-library-icons>
+                </div>
+                <div class="footer">
+                    <webdiv-library-tabs class="bottom"></webdiv-library-tabs>
+                </div>
+            </div>
+            <div class="editor">
+                <webdiv-library-editor slot="editor">
+                    <div class="container disabled" id="editordiv">
+                        <div class="preview">
+                            <div class="icon">
+                                <webdiv class="icon-placeholder" trigger="loop" icon="editor-select-icon">
+                                    <div class="previcon op-svg-hover" id="previcon"></div>
+                                </webdiv>
+                            </div>
+                            <div class="actions">
+                            </div>
+                        </div>
+                        <div class="content">
+                            <div class="lbl lbl-animation" style="margin-left:7px;">Animations</div>
+                            <select id="animated-icon-trigger">
+                                <option value="none" data-description="Loops for ever.">None</option>
+                                <option value="zoom" data-description="Loops for ever.">Zoom On Hover</option>
+                                <option value="pulse" data-description="Animates on hover">Pulse On Hover</option>
+                                <option value="shake" data-description="Loops for ever.">Shake On Hover</option>
+                                <option value="flip" data-description="Loops for ever.">Flip Y On Hover</option>
+                                <option value="flipX" data-description="Loops for ever.">Flip X On Hover</option>
+                            </select>
+                            <div class="editor">
+                                <div class="lbl">Colors</div>
+                                <div id="colors-list">
+                                    <div id="colors">
+                                        <input type='text' id="primary-color"/>
+                                        <input type='text' id="secondary-color"/>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="editor">
+                                <div class="lbl">Stroke</div>
+                                <div class="slidecontainer">
+                                    <input type="range" min="1" max="100" value="50" class="slider" id="stroke-range">
+                                    <div id="input" type="number" suffix="%">
+                                        <div id="value">
+                                   <span>
+                                      <!----><!---->
+                                   </span>
+                                            <input id="stroke-width" type="text" value="50">
+                                            <span>
+                                      <!---->%<!---->
+                                   </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% if craft.config.devMode %}
+                            <div class="btns" style="text-align:center;flex: 1;flex-basis: auto;margin:20px 0;">
+                                <button style="width:75%;margin-left:0px !important" type="button" class="btn-filter" id="copy-code" tabindex="0">Copy HTML Code</button>
+                                <span class="info op-m-tooltip" style="vertical-align: middle !important;"> <p>This option is not available in production environment</p></span>
+                            </div>
+                        {% endif %}
+
+                    </div>
+                </webdiv-library-editor>
+            </div>
+            <div class="mask"></div>
+        </div>
+    </webdiv-library-layout>
+</main>

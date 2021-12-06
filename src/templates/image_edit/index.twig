@@ -1,0 +1,35 @@
+{% import "_includes/forms" as forms %}
+{% block content %}
+
+<div id="image-optimize-container" style="display: flex;flex-direction: row;padding: 0;overflow: hidden;height: 100%;">
+    <div style="position: relative;z-index: 2;padding: 24px;width: calc(100% - 450px);height: 100%;box-sizing: border-box;box-shadow: 0 0 0 1px rgb(19 26 32 / 10%);overflow: hidden auto;">
+        <div>
+            {{ forms.textField({
+                first: true,
+                class: "text",
+                label: "Image Name"|t('one-plugin-media'),
+                id: "imageName",
+                value: asset.title,
+                autofocus: true,
+                disabled: true
+            }) }}
+
+            <div id="imageName-field" class="field first">
+                <div class="heading">
+                    <label id="imageName-label" for="imageName">Alt Text</label>
+                </div>
+                <div class="input ltr">
+                    <textarea id="onepluginmedia-alt-text" class="text" id="altText" name="altText" rows="4" cols="50" style="width:100%"></textarea>
+                </div>    
+            </div>
+        </div>
+    </div> 
+
+    <!-- SIDEBAR -->
+
+    <div style="padding:20px;flex:1;position: relative;display: block !important;top: auto;right: auto !important;left: auto !important;height: 100%;box-shadow: none;">
+        {{ asset.getSidebarHtml | raw }}
+    </div>
+                
+</div>
+{% endblock %}

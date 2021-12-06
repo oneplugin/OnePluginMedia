@@ -1,0 +1,70 @@
+#category-tree ul{
+    padding-left: 15px;
+    background-color: #003e85;
+}
+
+#category-tree ul li ul{
+    margin-left: -15px;
+    background-color: rgb(0, 54, 116);
+    padding-left: 30px;
+}
+
+#category-tree ul li ul li  ul{
+    margin-left: -30px;
+    background-color: #002f66;
+    padding-left: 45px;
+}
+
+#category-tree ul li ul li  ul li ul{
+    margin-left: -45px;
+    background-color: #61b9da;
+    padding-left: 60px;
+}
+
+#category-tree ul li a{
+    line-height: 30px;
+    width:100%;
+    font-weight: normal !important;
+    font-size: 14px !important;
+    color: #fff;
+}
+
+#category-tree ul li a:hover{
+    
+    text-decoration: none;
+}
+.jstree-anchor:before {
+    content: "";
+    display: inline-block;
+    width: 15px;
+    height: 15px;
+    margin-right: 8px;
+    background-color: #fff;
+    opacity:0.2;
+}
+
+.jstree-anchor:hover::before {
+    opacity:0.7;
+}
+
+.jstree-clicked:before {
+    opacity: 0.7;
+    background-color: #ffdc23 !important;
+}
+
+.jstree-clicked{
+    color: #ffdc23 !important;
+}
+
+.category{
+    border-bottom: solid 1px white;
+    margin-bottom: 5px;
+}
+
+#category-container{
+    background-color: #003e85;
+}
+
+#iconouter webdiv-library-sidebar .category>strong{
+    color: #fff !important;
+}
