@@ -14,7 +14,7 @@
 .vscode/*
 !.vscode/settings.json
 !.vscode/tasks.json
-!.vscode/launch.json
+*.vscode/launch.json
 !.vscode/extensions.json
 config.codekit3
 prepros-6.config

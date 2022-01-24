@@ -25,7 +25,8 @@ class SettingsController extends Controller
 
     public function init()
     {
-        $this->plugin = onepluginmedia::$plugin;
+        $this->requireAdmin();
+        $this->plugin = OnePluginMedia::$plugin;
         parent::init();
     }
 
@@ -73,18 +74,13 @@ class SettingsController extends Controller
     {
         $this->requirePostRequest();
         $postData = Craft::$app->request->post('settings', []);
-
-        $plugin = OnePluginMedia::getInstance();
-        $plugin->setSettings($postData);
-        $settings = $this->plugin->getSettings();
+        $this->plugin->setSettings($postData);
         
-        if (Craft::$app->plugins->savePluginSettings($plugin, $postData)) {
+        if (Craft::$app->plugins->savePluginSettings($this->plugin, $postData)) {
             Craft::$app->session->setNotice(Craft::t('one-plugin-media','Settings Saved'));
-
             return $this->redirectToPostedUrl();
         }
-
-        $errors = $plugin->getSettings()->getErrors();
+        $errors = $this->plugin->getSettings()->getErrors();
         Craft::$app->session->setError(
             implode("\n", StringHelper::flattenArrayValues($errors))
         );
