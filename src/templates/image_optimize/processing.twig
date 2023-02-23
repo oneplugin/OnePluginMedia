@@ -1,6 +1,6 @@
 {% import "_includes/forms" as forms %}
 {% block content %}
-
+{% if asset is defined and asset is not null %}
 <div id="image-optimize-container" style="display: flex;flex-direction: row;padding: 0;overflow: hidden;height: 100%;">
     <div style="position: relative;z-index: 2;padding: 24px;width: calc(100% - 450px);height: 100%;box-sizing: border-box;box-shadow: 0 0 0 1px rgb(19 26 32 / 10%);overflow: hidden auto;">
         <div>
@@ -9,8 +9,8 @@
                 class: "text",
                 label: "Image Name"|t('one-plugin-media'),
                 id: "imageName",
-                value: asset.title,
                 autofocus: true,
+                value: asset.title,
                 disabled: true
             }) }}
 
@@ -22,14 +22,39 @@
                     <textarea id="onepluginmedia-alt-text" class="text" id="altText" name="altText" rows="4" cols="50" style="width:100%"></textarea>
                 </div>    
             </div>
+
+            <div id="imageName-field" class="field first">
+                <div class="heading">
+                    <label id="imageName-label" for="imageName">Status</label>
+                </div>
+                <div class="input ltr">
+                    <span>We are processing the image for optimization.</span>
+                    <span class="error" style="display:block">Optimized images are created using queues in Craft. So please make sure the queue is running. <a href='{{ url('utilities/queue-manager') }}' target="_blank">Run queue now </a></span>
+                </div>    
+            </div>
         </div>
-    </div> 
-
-    <!-- SIDEBAR -->
-
-    <div style="padding:20px;flex:1;position: relative;display: block !important;top: auto;right: auto !important;left: auto !important;height: 100%;box-shadow: none;">
-        {{ asset.getSidebarHtml | raw }}
+        <div id="image-processing">
+            <div class="spinner"></div>
+        </div>
     </div>
-                
+    
+    <!-- SIDEBAR -->
+    <div style="padding:20px;flex:1;position: relative;display: block !important;top: auto;right: auto !important;left: auto !important;height: 100%;box-shadow: none;">
+        {{ asset.getSidebarHtml(false) | raw }}
+    </div>
 </div>
+
+{% else %}
+
+<div style="padding: 20px;">
+    <div id="imageName-field" class="field first">
+        <div class="heading">
+            <label id="imageName-label" for="imageName">Status</label>
+        </div>
+        <div class="input ltr">
+            <span style="color:red">Asset seems to be deleted.</span>
+        </div>    
+    </div>
+</div>
+{% endif %}
 {% endblock %}

@@ -1,19 +1,22 @@
 <?php
+
 /**
  * OnePlugin Media plugin for Craft CMS 3.x
  *
- * Build a Craft CMS site with one field!
+ * OnePlugin Media lets the Craft community embed rich contents on their website
  *
- * @link      https://github.com/oneplugin/
- * @copyright Copyright (c) 2021 OnePlugin
+ * @link      https://github.com/oneplugin
+ * @copyright Copyright (c) 2022 The OnePlugin Team
  */
 
 namespace oneplugin\onepluginmedia\controllers;
 
 use Craft;
+
 use yii\web\Response;
 use craft\web\Controller;
 use craft\web\assets\cp\CpAsset;
+
 use oneplugin\onepluginmedia\OnePluginMedia;
 use oneplugin\onepluginmedia\helpers\StringHelper;
 use oneplugin\onepluginmedia\records\OnePluginMediaVersion;
@@ -23,16 +26,17 @@ class SettingsController extends Controller
 
     public $plugin;
 
-    public function init()
+    public function init():void
     {
-        $this->requireAdmin();
         $this->plugin = OnePluginMedia::$plugin;
         parent::init();
     }
 
     public function actionIndex(): Response
     {
+        $this->requireAdmin();
         $settings = $this->plugin->getSettings();
+
         $baseAssetsUrl = Craft::$app->assetManager->getPublishedUrl(
             '@oneplugin/onepluginmedia/assetbundles/onepluginmedia/dist',
             true
@@ -74,13 +78,23 @@ class SettingsController extends Controller
     {
         $this->requirePostRequest();
         $postData = Craft::$app->request->post('settings', []);
-        $this->plugin->setSettings($postData);
+
+        $plugin = OnePluginMedia::getInstance();
+        $plugin->setSettings($postData);
+        $settings = $this->plugin->getSettings();
         
-        if (Craft::$app->plugins->savePluginSettings($this->plugin, $postData)) {
-            Craft::$app->session->setNotice(Craft::t('one-plugin-media','Settings Saved'));
+        if (Craft::$app->plugins->savePluginSettings($plugin, $postData)) {
+            Craft::$app->session->setNotice(OnePluginMedia::t('Settings Saved'));
+
+            $opHash = $this->generateOpHash($postData);
+            if( $opHash != $settings->opSettingsHash){
+                $this->plugin->onePluginMediaService->addRegenerateAllImageOptimizeJob();
+                Craft::$app->plugins->savePluginSettings($plugin, ['opSettingsHash'=>$opHash]);
+            }
             return $this->redirectToPostedUrl();
         }
-        $errors = $this->plugin->getSettings()->getErrors();
+
+        $errors = $plugin->getSettings()->getErrors();
         Craft::$app->session->setError(
             implode("\n", StringHelper::flattenArrayValues($errors))
         );
@@ -99,6 +113,15 @@ class SettingsController extends Controller
         $response = $this->plugin->onePluginMediaService->checkForUpdates($version);
         return $this->asJson($this->plugin->onePluginMediaService->downloadLatestVersion($response));
 
+    }
+
+    private function generateOpHash($postData){
+
+        if( empty($postData['opUpscale'])){
+            $postData['opUpscale'] =  '0';
+        }
+        $source = $postData['opOutputFormat'] . $postData['opUpscale'] . $this->implode_all('x',$postData['opImageVariants']);
+        return md5($source);
     }
 
     private function implode_all($glue, $arr){            

@@ -1,0 +1,117 @@
+{% import "_includes/forms" as forms %}
+{% macro bytesToSize(bytes) %}
+{% apply spaceless %}
+    {% set kilobyte = 1024 %}
+    {% set megabyte = kilobyte * 1024 %}
+    {% set gigabyte = megabyte * 1024 %}
+    {% set terabyte = gigabyte * 1024 %}
+
+    {% if bytes < kilobyte %}
+        {{ bytes ~ ' B' }}
+    {% elseif bytes < megabyte %}
+        {{ (bytes / kilobyte)|number_format(2, '.') ~ ' KiB' }}
+    {% elseif bytes < gigabyte %}
+        {{ (bytes / megabyte)|number_format(2, '.') ~ ' MiB' }}
+    {% elseif bytes < terabyte %}
+        {{ (bytes / gigabyte)|number_format(2, '.') ~ ' GiB' }}
+    {% else %}
+        {{ (bytes / terabyte)|number_format(2, '.') ~ ' TiB' }}
+    {% endif %}
+{% endapply %}
+{% endmacro %}
+{% from _self import bytesToSize %}
+
+{% block content %}
+<div id="image-optimize-container" style="display: flex;flex-direction: row;padding: 0;overflow: hidden;height: 100%;">
+    <div style="position: relative;z-index: 2;padding: 24px;width: calc(100% - 450px);height: 100%;box-sizing: border-box;box-shadow: 0 0 0 1px rgb(19 26 32 / 10%);overflow: hidden auto;">
+        <div>
+            {{ forms.textField({
+                first: true,
+                class: "text",
+                label: "Image Name"|t('one-plugin-media'),
+                id: "imageName",
+                value: derivations.name,
+                autofocus: true,
+                disabled: true
+            }) }}
+
+            <div id="imageName-field" class="field first">
+                <div class="heading">
+                    <label id="imageName-label" for="imageName">Alt Text</label>
+                </div>
+                <div class="input ltr">
+                    <textarea id="onepluginmedia-alt-text" class="text" id="altText" name="altText" rows="4" cols="50" style="width:100%"></textarea>
+                </div>    
+            </div>
+            <div id="image-variations" class="field first">
+                <div class="heading">
+                    <label id="imageName-label" for="imageName">Image Variations:</label>
+                </div>
+                {% set aspectRatio = derivations.width / derivations.height %}
+                {% for key,derivation in derivations.imageUrls %}
+                    {% set width = 400 %}
+                    {% if derivation.width >= 1200 %}
+                        {% set width = 650 %}
+                    {% elseif derivation.width >= 992 %}
+                        {% set width = 550 %}
+                    {% elseif derivation.width >= 768 %}
+                        {% set width = 450 %}
+                    {% else %}
+                        {% set width = 400 %}
+                    {% endif %}
+                    {% set height = width / aspectRatio %}
+                    {% if derivation.url is not empty %}
+                        <div class="input ltr">
+                            <div>
+                                <div style="width: {{width}}px; vertical-align: top;">
+                                    <a href="{{derivation.url}}" target="_blank">
+                                        <div style="position: relative;">
+                                            <img height="{{ height * 0.8 }}" src="{{derivation.url}}" width="{{width * 0.8}}">
+                                            </img>
+                                        </div>
+                                    </a>
+                                </div>
+                                <div style="text-align: left; padding-bottom: 20px;">
+                                    <span style="text-transform: uppercase; color: #888888">
+                                        {{derivation.width}} x {{derivation.height}} pxs | {{derivations.extension}} 
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                        {% else %}
+                        <div class="input ltr">
+                            <div>
+                                <div style="width: {{width}}px; vertical-align: top;">
+                                    <div style="position: relative;">
+                                        <svg height="{{ height * 0.8 }}" width="{{width * 0.8}}">
+                                            <rect width="{{width * 0.8}}" height="{{ height * 0.8 }}" style="fill:rgb(220,220,220);stroke-width:3;stroke:rgb(255,0,0)" />
+                                            <text x="50%" y="30%" dominant-baseline="middle" text-anchor="middle" font-weight="bold">{{derivation.width}} x {{derivation.height}} PXS</text>
+                                            <text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle">IMAGE NOT UPSCALED!</text>
+                                        </svg>
+                                    </div>
+                                </div>
+                                <div style="text-align: left; padding-bottom: 20px;">
+                                    <span style="text-transform: uppercase; color: #888888">
+                                        {{derivation.width}} x {{derivation.height}} pxs
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                        {%endif %}
+                {% endfor %}
+            </div>
+        </div>
+    </div>  
+
+
+
+
+
+                <!-- SIDEBAR -->
+
+    <div style="padding:20px;flex:1;position: relative;display: block !important;top: auto;right: auto !important;left: auto !important;height: 100%;box-shadow: none;">
+        {{ asset.getSidebarHtml(false) | raw }}
+    </div>
+                
+</div>
+{% endblock %}

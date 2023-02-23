@@ -1,32 +1,44 @@
 <?php
+
 /**
  * OnePlugin Media plugin for Craft CMS 3.x
  *
- * Build a Craft CMS site with one field!
+ * OnePlugin Media lets the Craft community embed rich contents on their website
  *
- * @link      https://github.com/oneplugin/
- * @copyright Copyright (c) 2021 OnePlugin
+ * @link      https://github.com/oneplugin
+ * @copyright Copyright (c) 2022 The OnePlugin Team
  */
 
 namespace oneplugin\onepluginmedia\fields;
 
 use Craft;
+
 use yii\db\Schema;
 use craft\base\Field;
 use craft\helpers\Json;
 use craft\base\ElementInterface;
 use craft\web\assets\cp\CpAsset;
-use oneplugin\onepluginmedia\OnePluginMedia;
 use oneplugin\onepluginmedia\models\OnePluginMediaAsset;
+use oneplugin\onepluginmedia\gql\types\OnePluginMediaGqlType;
+use oneplugin\onepluginmedia\OnePluginMedia as OnePluginMediaPlugin;
 
-class OnePluginMediaField extends Field
+class OnePluginMedia extends Field
 {
     public $mandatory = false;
-    public $allowedContents = '*';
 
+    /** @var array */
+    public $allowedContents = '*';
+    public $allowedSources = '*';
+    
     public static function displayName(): string
     {
         return Craft::t('one-plugin-media', 'OnePlugin Media');
+    }
+
+    public function rules(): array
+    {
+        $rules = parent::rules();
+        return $rules;
     }
 
     public function getContentColumnType(): string
@@ -45,14 +57,8 @@ class OnePluginMediaField extends Field
             return [];
         }
     }
-
-    public function rules()
-    {
-        $rules = parent::rules();
-        return $rules;
-    }
-
-    public function normalizeValue($value, ElementInterface $element = null)
+    
+    public function normalizeValue($value, ElementInterface $element = null): mixed
     {
         if( $value ==  null)
         {
@@ -81,8 +87,9 @@ class OnePluginMediaField extends Field
         return $value;
     }
 
-    public function serializeValue($value, ElementInterface $element = null)
+    public function serializeValue($value, ElementInterface $element = null): mixed
     {
+
         if ($value instanceof OnePluginMediaAsset)
         {
             $value = $value->json;
@@ -90,23 +97,25 @@ class OnePluginMediaField extends Field
         return parent::serializeValue($value, $element);
     }
 
-    public function getSettingsHtml()
+    public function getSettingsHtml():string
     {  
         return Craft::$app->getView()->renderTemplate(
-            'one-plugin-media/_components/fields/field_settings',
+            'one-plugin-media/_components/fields/_settings',
             [
                 'field' => $this,
-                'availableContents' => $this->availableContent()
+                'availableContents' => $this->availableContent(),
+                'availableSources' => $this->availableSources()
             ]
         );
     }
 
+    
     public function getInputHtml($value, ElementInterface $element = null): string
     {
-        $settings = OnePluginMedia::$plugin->getSettings();
+        $settings = OnePluginMediaPlugin::$plugin->getSettings();
         
         $folder = 'dist';
-        if( OnePluginMedia::$plugin->devMode ){
+        if( OnePluginMediaPlugin::$devMode ){
             $folder = 'src';
         }
         $baseAssetsUrl = Craft::$app->assetManager->getPublishedUrl(
@@ -116,15 +125,15 @@ class OnePluginMediaField extends Field
         $cssFiles = [];
         $jsFiles = [];
 
-        if( OnePluginMedia::$plugin->devMode ){
+        if( OnePluginMediaPlugin::$devMode ){
             $cssFiles = [$baseAssetsUrl . '/css/onepluginmedia.css',$baseAssetsUrl . '/themes/default/style.css'];
-            $jsFiles = [ $baseAssetsUrl . '/js/onepluginmedia.js',$baseAssetsUrl . '/js/spectrum.min.js',$baseAssetsUrl . '/js/jstree.js',$baseAssetsUrl . '/js/selectric.min.js'];
+            $jsFiles = [ $baseAssetsUrl . '/js/icons/lottie_svg.js',$baseAssetsUrl . '/js/icons/onepluginmedia-lottie.js',$baseAssetsUrl . '/js/onepluginmedia.js',$baseAssetsUrl . '/js/spectrum.min.js',$baseAssetsUrl . '/js/jstree.js',$baseAssetsUrl . '/js/selectric.min.js'];
         }
         else{
             $cssFiles = [$baseAssetsUrl . '/css/onepluginmedia.min.css',$baseAssetsUrl . '/themes/default/style.min.css'];
             $jsFiles = [$baseAssetsUrl . '/js/onepluginmedia-cp.min.js'];
         }
-                
+        
         foreach ($cssFiles as $cssFile) {
             Craft::$app->getView()->registerCssFile($cssFile);
         }
@@ -132,25 +141,36 @@ class OnePluginMediaField extends Field
             Craft::$app->getView()->registerJsFile($jsFile,['depends' => CpAsset::class]);
         }
         
+
+        // Get our id and namespace
         $id = Craft::$app->getView()->formatInputId($this->handle);
         $namespacedId = Craft::$app->getView()->namespaceInputId($id);
+
+        // Variables to pass down to our field JavaScript to let it namespace properly
+        $allowedContents = is_array($this->allowedContents) ? $this->allowedContents : [$this->allowedContents ];
+
+        $allowedSources = is_array($this->allowedSources) ? $this->allowedSources : [$this->allowedSources ];
+        if( sizeof( $allowedSources ) == 1 && ( empty($allowedSources[0]) || $allowedSources[0] == '*' ) ){
+            $allowedSources = '*';
+        }
         $jsonVars = [
             'namespace' => $namespacedId,
-            'svg-stroke-color' => $settings->svgStrokeColor
-        ];
+            'svg-stroke-color' => $settings->svgStrokeColor,
+            'svg-stroke-width' => $settings->svgStrokeWidth,
+            'allowedSources' => $allowedSources
+            ];
         $jsonVars = Json::encode($jsonVars);
-        Craft::$app->getView()->registerJs("new OnePluginMediaInput(" . $jsonVars . ");");
+        Craft::$app->getView()->registerJs("new OnePluginMediaSelectInput(" . $jsonVars . ");");
 
-        $allowedContents = is_array($this->allowedContents) ? $this->allowedContents : [$this->allowedContents ];
+        // Render the input template
         $asset = null;
         if( $value != null && ( $value->iconData['type'] == 'imageAsset') ){
             if( isset($value->iconData['id']) && !empty($value->iconData['id'])){
                 $asset = Craft::$app->getAssets()->getAssetById($value->iconData['id']);
             }
         }
-
         return Craft::$app->getView()->renderTemplate(
-            'one-plugin-media/_components/fields/field_input',
+            'one-plugin-media/_components/fields/_input',
             [
                 'name' => $this->handle,
                 'fieldValue' => $value,
@@ -158,15 +178,46 @@ class OnePluginMediaField extends Field
                 'id' => $id,
                 'settings' => $settings,
                 'allowedContents' => $allowedContents,
+                'allowedSources' => $allowedSources,
                 'asset' => $asset
             ]
         );
+    }
+
+    public function getContentGqlType(): \GraphQL\Type\Definition\Type|array
+    {
+        $typeArray = OnePluginMediaGqlType::generateTypes($this);
+
+        return [
+            'name' => $this->handle,
+            'description' => "OnepluginMedia field",
+            'type' => array_shift($typeArray),
+        ];
     }
 
     private function availableContent(): array{
 
         return [['label' => 'All','value' =>'*'], 
                 ['label' => 'Images','value' =>'imageAsset'],
-                ['label' => 'SVG Icons','value' =>'svg']];
+                ['label' => 'SVG Icons','value' =>'svg'],
+                ];
+    }
+
+    private function availableSources(): array{
+
+        $sources = Craft::$app->getElementSources()->getSources('craft\elements\Asset', 'modal');
+        $options = [];
+        $optionNames = [];
+        foreach ($sources as $source) {
+            if (!isset($source['heading'])) {
+                $options[] = [
+                    'label' => $source['label'],
+                    'value' => $source['key'],
+                ];
+                $optionNames[] = $source['label'];
+            }
+        }
+        array_multisort($optionNames, SORT_NATURAL | SORT_FLAG_CASE, $options);
+        return $options;
     }
 }

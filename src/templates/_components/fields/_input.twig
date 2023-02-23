@@ -1,18 +1,3 @@
-{# @var craft \craft\web\twig\variables\CraftVariable #}
-{#
-/**
- * Animated Icons plugin for Craft CMS 3.x
- *
- * AnimatedIconsField Field Input
- *
- * @author    Jugs
- * @copyright Copyright (c) 2021 Jugs
- * @link      https://oneplugin.co/
- * @package   AnimatedIcons
- * @since     1.0.0
- */
-#}
-
 {% import "_includes/forms" as forms %}
 {% set jsClass = (jsClass is defined and jsClass ? jsClass : 'AnimatedIconSelectInput') -%}
 
@@ -50,11 +35,14 @@
 
         <div id="{{ id }}-image" class="op-select hidden">
             <div class="elements">
+
             </div>
+
             <div class="flex">
                 <button type="button" class="btn add icon dashed">{{"Add Image"|t('one-plugin-media')}}</button>
             </div>
         </div>
+
         <div id="{{ id }}-svg" class="op-select hidden">
             <div class="elements">
 
@@ -96,10 +84,8 @@
             {% if iconType is not empty and (iconType == 'imageAsset') %}
                 {% set status = 'exists' %}
                 {% if asset is not defined or asset is null %} {% set status = 'deleted' %}{%endif%}
-                <div style="display:flex"><div class="element small hasthumb" data-type="craft\elements\Asset" data-alt="{{altText}}" data-status="{{status}}" data-site-id="{{ siteId }}" data-id="{{ assetId }}" data-title="{{ name }}" data-status="enabled" data-url="{{ assetUrl }}" data-editable=""><div class="elementthumb"> {{fieldValue.getThumbHtml()}} </div><div class="label"><span class="title">{{ name }}</span></div></div><a href="#" id="{{ id }}-remove" style="margin-top:6px;margin-left:10px;" class="delete icon" title="Remove"></a></div>
+                <div style="display:flex"><div class="element small hasthumb" data-type="craft\elements\Asset" data-alt="{{altText}}" data-status="{{status}}" data-site-id="{{ siteId }}" data-id="{{ assetId }}" data-title="{{ name }}" data-status="enabled" data-url="{{ assetUrl }}" data-editable=""><div class="elementthumb"> {{fieldValue.getThumbHtml()}} </div><div class="label"><span class="title">{{ name }}</span></div></div><a id="{{ id }}-remove" style="margin-top:6px;margin-left:10px;" class="delete icon" title="Remove"></a></div>
             {% endif %}
         </div>
-
-        <div id="{{ id }}-preview-map" class="hidden google-map"></div>
     </div>
 </div>

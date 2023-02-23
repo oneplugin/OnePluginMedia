@@ -1,0 +1,200 @@
+{% extends "one-plugin-media/_layouts/newiconpack" %}
+{% set selectedSubnavItem = 'svg-icon-packs' %}
+{% import '_includes/forms' as forms %}
+
+{% set title = "Add New SVG Icon Pack"|t("one-plugin-media") %}
+
+{% block content %}
+
+    {{ actionInput('one-plugin-media/svg-icons/save') }}
+    {{ redirectInput('one-plugin-media/svg-icons') }}
+    {{ csrfInput() }}
+
+    {{ forms.textField({
+        size: "60",
+        first: true,
+        class: "code",
+        label: "Icon Pack Name"|t('one-plugin-media'),
+        instructions: "What this icon pack is called"|t('one-plugin-media'),
+        id: "packName",
+        name: "packName",
+        required:true,
+        value: iconPack.name ?? '',
+        autofocus: true,
+        errors: iconPack.getErrors("packName"),
+    }) }} 
+    
+    <div id="icon-examples" class="upload__box">
+        <div id="icons-field" class="field">
+            <div class="heading">
+                <label id="packName-label" for="packName">All Icons<span class="visually-hidden">Required</span><span class="required" aria-hidden="true"></span></label>
+            </div>
+            <div id="icons-instructions" class="instructions"><p>Preview all the icons here</p></div>
+            <div class="input ltr">
+                <div class="upload__img-wrap icons">
+
+                </div>
+                <div class="drop-zone">
+                    <span class="drop-zone__prompt">Drop SVG Icon files here or click to upload</span>
+                </div>
+                <div class="upload__btn-box">
+                    <label class="upload__btn">
+                        <input name="icons" type="file" multiple="" data-max_length="100" class="upload__inputfile drop-zone__input" accept="image/svg+xml" >
+                    </label>
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}
+
+
+{% js %}
+
+  imgArray = [];
+  function ImgUpload() {
+    
+    var imgWrap = "";
+    $('.drop-zone')[0].addEventListener("click", (e) => {
+      $('.upload__inputfile').click();
+    });
+
+    $('.drop-zone')[0].addEventListener("dragover", (e) => {
+        e.preventDefault();
+        $('.drop-zone')[0].classList.add("drop-zone--over");
+    });
+    
+    ["dragleave", "dragend"].forEach((type) => {
+        $('.drop-zone')[0].addEventListener(type, (e) => {
+            $('.drop-zone')[0].classList.remove("drop-zone--over");
+        });
+    });
+
+    $('.drop-zone')[0].addEventListener("drop", (e) => {
+        e.preventDefault();
+        if (e.dataTransfer.files.length) {
+            $('.upload__inputfile')[0].files = e.dataTransfer.files;
+            updateThumbNail(e.dataTransfer.files);
+        }
+        $('.drop-zone')[0].classList.remove("drop-zone--over");
+    });
+
+    
+    $('.upload__inputfile').each(function () {
+      $(this).on('change', function (e) {
+        updateThumbNail(e.target.files);
+      });
+    });
+    
+    function updateThumbNail(files)
+    {
+        imgWrap = $('.upload__inputfile').closest('.upload__box').find('.upload__img-wrap');
+        var maxLength = $(this).attr('data-max_length');
+  
+        var filesArr = Array.prototype.slice.call(files);
+        var iterator = 0;
+    
+        filesArr.forEach(function (f, index) {
+
+            if (!f.type.match('image.*')) {
+                return;
+            }
+
+            {
+                var len = 0;
+                for (var i = 0; i < imgArray.length; i++) 
+                {
+                    if (imgArray[i] !== undefined) 
+                    {
+                        len++;
+                    }
+                }
+                 
+                {
+                    imgArray.push(f);
+
+                    var reader = new FileReader();
+                    reader.onload = function (e) {
+                        const svg = e.target.result;
+                        let $svg = $(svg);
+                        let finalSVG = '';
+                        for (const el of $svg.children())
+                        {
+                            finalSVG += el.outerHTML;
+                        }
+                        let svgTag = "<svg xmlns='http://www.w3.org/2000/svg' style='width:100px;height:100px;' stroke-width=1 stroke=#5E72E4 ";
+
+                        $.each( $svg[0].attributes, function ( index, attribute ) {
+                            const needed = !['xmlns','width','height'].some(str => attribute.name.includes(str));
+                            if(needed){
+                                svgTag += `${attribute.name}='${attribute.value}' `
+                            }
+                            
+                        });
+                        svgTag += ">";
+                        
+                        
+                        var html = "<div class='premium'><div class='iicon op-svg-click' data-number='" + $(".upload__img-close").length + "' data-file='" + f.name + "'>" + svgTag + finalSVG + "</svg></div><div style='z-index: 99;width:100%;text-align:center;''>" + f.name + "</div><div style='z-index: 99;' class='upload__img-close'></div><div class='bg'></div></div>";
+                        imgWrap.append(html);
+                        iterator++;
+                    }
+                    reader.readAsText(f);
+                }
+            }
+        });
+    }
+
+    $('body').on('click', ".upload__img-close", function (e) {
+      var file = $(this).parent().children('.iicon').data("file");
+      for (var i = 0; i < imgArray.length; i++) {
+        if (imgArray[i].name === file) {
+            imgArray.splice(i, 1);
+          break;
+        }
+      }
+      $(this).parent().remove();
+    });
+  }
+
+  
+
+  $(function() {
+    ImgUpload();
+    var that = this;
+    $("form").submit(function() {
+        let url = Craft.getActionUrl($(this).find("[name=action]").attr('value'));
+        let files = imgArray;
+        let formdata = new FormData();
+        let file;
+        let reader;
+        formdata.append(Craft.csrfTokenName,Craft.csrfTokenValue); // Append CSRF Token
+        formdata.append("name", $(this).find("[name=packName]").val()); 
+        for (let i = 0; i < files.length; i++) {
+            file = files[i];
+            if (window.FileReader) {
+                reader = new FileReader();
+                reader.readAsDataURL(file);
+            }
+            console.log(file)
+            formdata.append("icons[]", file);
+        }
+
+
+        $.ajax({
+            type: "POST",
+            url: url,
+            data: formdata,
+            processData: false,  
+            contentType: false,
+            success: function(json) {
+                window.location.href = Craft.getCpUrl('one-plugin-media/svg-icons');
+            },
+            error: function (xhr, ajaxOptions, thrownError) {
+                Craft.cp.displayError(xhr?.responseJSON?.error?.join("\n"));
+            }
+        });
+
+        return false;
+    });
+})
+{% endjs %}

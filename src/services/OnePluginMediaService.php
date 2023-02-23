@@ -1,26 +1,80 @@
 <?php
+
 /**
  * OnePlugin Media plugin for Craft CMS 3.x
  *
- * Build a Craft CMS site with one field!
+ * OnePlugin Media lets the Craft community embed rich contents on their website
  *
- * @link      https://github.com/oneplugin/
- * @copyright Copyright (c) 2021 OnePlugin
+ * @link      https://github.com/oneplugin
+ * @copyright Copyright (c) 2022 The OnePlugin Team
  */
 
 namespace oneplugin\onepluginmedia\services;
 
 use Craft;
+use craft\helpers\App;
 use GuzzleHttp\Client;
 use craft\base\Component;
+use oneplugin\onepluginmedia\OnePluginMedia;
+use oneplugin\onepluginmedia\jobs\OptimizeImageJob;
 use oneplugin\onepluginmedia\records\OnePluginMediaSVGIcon;
 use oneplugin\onepluginmedia\records\OnePluginMediaVersion;
 use oneplugin\onepluginmedia\records\OnePluginMediaCategory;
-
+use oneplugin\onepluginmedia\records\OnePluginMediaOptimizedImage;
+use oneplugin\onepluginmedia\records\OnePluginMediaOptimizedImage as OnePluginMediaOptimizedImageRecord;
 
 class OnePluginMediaService extends Component
 {
     const SERVER_URL = 'https://dev.oneplugin.co';
+
+    // Public Methods
+    // =========================================================================
+    
+    public function addRegenerateAllImageOptimizeJob(){
+
+        $queue = Craft::$app->getQueue();
+        $assets = OnePluginMediaOptimizedImage::find()->all();
+        foreach($assets as $asset){
+            Craft::$app->db->createCommand()
+            ->upsert(OnePluginMediaOptimizedImage::tableName(), [
+                'content' => '',
+                'assetId' => $asset->assetId
+            ], true, [], true)
+            ->execute();
+
+            $jobId = $queue->push(new OptimizeImageJob([
+                'description' => Craft::t('one-plugin-media', 'OnePlugin Media - Job for optimizing image with id {id}', ['id' => $asset->assetId]),
+                'assetId' => $asset->assetId,
+                'force' => true
+            ]));
+        }
+    }
+
+    public function addImageOptimizeJob($assetId, $force,$runQueue = false){
+
+        $assets = OnePluginMediaOptimizedImageRecord::find()->where(['assetId' => $assetId])->all();
+        
+        if($force){ //Make sure the content is cleared
+            Craft::$app->db->createCommand()
+                    ->upsert(OnePluginMediaOptimizedImage::tableName(), [
+                        'content' => '',
+                        'assetId' => $assetId
+                    ], true, [], true)
+                    ->execute();
+        }
+
+        $queue = Craft::$app->getQueue();
+        $jobId = $queue->push(new OptimizeImageJob([
+            'description' => Craft::t('one-plugin-media', 'OnePlugin Media - Job for optimizing image with id {id}', ['id' => $assetId]),
+            'assetId' => $assetId,
+            'force' => $force
+        ]));
+
+        if($runQueue){
+            App::maxPowerCaptain();
+            Craft::$app->getQueue()->run();
+        }
+    }
 
     public function checkForUpdates( $current_version)
     {
@@ -46,9 +100,6 @@ class OnePluginMediaService extends Component
 
             foreach ($categories as $category) {
                 $type = 'svg';
-                if($category['type'] == 'ANIMATEDICON'){
-                    continue;
-                }
                 $parent_id = 0;
                 if( !empty($category['parent_id'])){
                     $parent_id = $category['parent_id'];
@@ -106,6 +157,7 @@ class OnePluginMediaService extends Component
             }
 
             Craft::$app->getDb()->createCommand("update onepluginmedia_category set count = (select count(id) from onepluginmedia_svg_icon where onepluginmedia_svg_icon.category = onepluginmedia_category.id) where onepluginmedia_category.type = 'svg'")->execute();
+            Craft::$app->plugins->savePluginSettings(OnePluginMedia::$plugin, ['newContentPackAvailable'=>false]);
         }
 
         $command = Craft::$app->getDb()->createCommand()->update(OnePluginMediaVersion::tableName(), [

@@ -1,12 +1,14 @@
 <?php
+
 /**
  * OnePlugin Media plugin for Craft CMS 3.x
  *
- * Build a Craft CMS site with one field!
+ * OnePlugin Media lets the Craft community embed rich contents on their website
  *
- * @link      https://github.com/oneplugin/
- * @copyright Copyright (c) 2021 OnePlugin
+ * @link      https://github.com/oneplugin
+ * @copyright Copyright (c) 2022 The OnePlugin Team
  */
+
 
 namespace oneplugin\onepluginmedia\controllers;
 
@@ -14,45 +16,31 @@ use Craft;
 use yii\web\Response;
 use craft\db\Paginator;
 use craft\web\Controller;
+
 use oneplugin\onepluginmedia\OnePluginMedia;
 use oneplugin\onepluginmedia\records\OnePluginMediaSVGIcon;
 use oneplugin\onepluginmedia\records\OnePluginMediaCategory;
+use oneplugin\onepluginmedia\records\OnePluginMediaOptimizedImage;
+use oneplugin\onepluginmedia\models\OnePluginMediaOptimizedImage as OnePluginMediaOptimizedImageModel;
 
-
-class OnePluginMediaController extends Controller
+class OnePluginController extends Controller
 {
+
     public $plugin;
-    protected $allowAnonymous = true;
+    protected array|bool|int $allowAnonymous = true;
     const QUERY_PAGE_SIZE = 30;
 
-    public function init()
+    public function init():void
     {
         $this->plugin = OnePluginMedia::$plugin;
         parent::init();
     }
-
     public function actionIndex()
     {
-        return $this->redirect("one-plugin-media/settings");
-    }
 
-    public function actionImageEdit(): Response
-    {
-        $this->requirePostRequest();
-        $assetId = Craft::$app->getRequest()->getBodyParam('assetId');
-        $asset = Craft::$app->getAssets()->getAssetById($assetId);
-        $settings = $this->plugin->getSettings();
-        $previewable = Craft::$app->getAssets()->getAssetPreviewHandler($asset) !== null;
-        return $this->renderTemplate('one-plugin-media/image_edit/index', array_merge(
-            [
-                'plugin' => $this->plugin,
-                'settings' => $settings,
-                'asset' => $asset,
-                'previewable' => $previewable
-            ],
-            Craft::$app->getUrlManager()->getRouteParams())
-        );
-    
+        $url = "one-plugin-media/settings";
+        return $this->redirect($url);
+
     }
 
     public function actionShow(): Response
@@ -65,6 +53,45 @@ class OnePluginMediaController extends Controller
                     'settings' => $settings,
                 ],
                 Craft::$app->getUrlManager()->getRouteParams())
+        );
+    }
+
+    public function actionOptimizeDialog(): Response
+    {
+        $this->requirePostRequest();
+        $assetId = Craft::$app->getRequest()->getBodyParam('assetId');
+        $userSession = Craft::$app->getUser();
+        $asset = Craft::$app->getAssets()->getAssetById($assetId);
+        $settings = $this->plugin->getSettings();
+        if( $asset ){
+            $assets = OnePluginMediaOptimizedImage::find()->where(['assetId' => $assetId] )->all();
+            $previewable = Craft::$app->getAssets()->getAssetPreviewHandler($asset) !== null;
+            if( count($assets) > 0 ){
+                if( !empty($assets[0]['content'] ) ){
+                    $optimizedImage = new OnePluginMediaOptimizedImageModel($assets[0]['content']);
+                    return $this->renderTemplate('one-plugin-media/image_optimize/index', array_merge(
+                        [
+                            'plugin' => $this->plugin,
+                            'settings' => $settings,
+                            'derivations' => $optimizedImage,
+                            'asset' => $asset,
+                            'previewable' => $previewable
+                        ],
+                        Craft::$app->getUrlManager()->getRouteParams())
+                    );
+                }
+            }
+            else{
+                $this->plugin->onePluginMediaService->addImageOptimizeJob($assetId, true, false);
+            }
+        }
+        return $this->renderTemplate('one-plugin-media/image_optimize/processing', array_merge(
+            [
+                'plugin' => $this->plugin,
+                'settings' => $settings,
+                'asset' => $asset
+            ],
+            Craft::$app->getUrlManager()->getRouteParams())
         );
     }
 
@@ -135,4 +162,27 @@ class OnePluginMediaController extends Controller
         $result['currentPage'] = $pages->currentPage;
         return  $this->asJson($result);
     }
+
+    public function actionCreateOptimizedImage(){
+
+        $this->requirePostRequest();
+        $assetId = Craft::$app->getRequest()->getBodyParam('assetId');
+        $force = Craft::$app->getRequest()->getBodyParam('force');
+
+        $this->plugin->onePluginMediaService->addImageOptimizeJob($assetId, $force, false);
+        return $this->asJson(['success' => true]);
+    }
+
+    public function actionCheckAsset($assetId){
+
+        $assets = OnePluginMediaOptimizedImage::find()->where(['assetId'=>$assetId])->all();
+        if( count($assets) > 0 ){
+            if( !empty($assets[0]['content']) ){
+                return $this->asJson(['result' => true]);
+            }
+        }
+        
+        return $this->asJson(['result' => false]);
+    }
+    
 }

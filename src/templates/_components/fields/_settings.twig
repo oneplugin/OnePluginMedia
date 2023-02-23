@@ -1,18 +1,3 @@
-{# @var craft \craft\web\twig\variables\CraftVariable #}
-{#
-/**
- * Animated Icons plugin for Craft CMS
- *
- * AnimatedIconsField Field Settings
- *
- * @author    Jugs
- * @copyright Copyright (c) 2021 Jugs
- * @link      https://oneplugin.co/
- * @package   AnimatedIcons
- * @since     1.0.0
- */
-#}
-
 {% import "_includes/forms" as forms %}
 
 {{ 
@@ -33,5 +18,15 @@
     name: 'allowedContents',
     options: availableContents,
     values: field.allowedContents,
+    showAllOption: true,
+}) }}
+
+{{ forms.checkboxSelectField({
+    label: "Sources"|t('one-plugin-media'),
+    instructions: "Which sources do you want to select image from?",
+    id: 'oneplugin-asset-sources',
+    name: 'allowedSources',
+    options: availableSources,
+    values: field.allowedSources,
     showAllOption: true,
 }) }}

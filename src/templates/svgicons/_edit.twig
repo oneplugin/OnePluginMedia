@@ -1,0 +1,50 @@
+{% extends "_layouts/cp" %}
+{% import '_includes/forms' as forms %}
+
+{% set title = "Edit SVG Icon Pack"|t("one-plugin-media") %}
+{% set selectedSubnavItem = 'svg-icon-packs' %}
+{% set crumbs = [
+    { label: settings.pluginName, url: url("one-plugin-media") },
+    { label: "SVG Icon Packs"|t("one-plugin-media"), url: url("one-plugin-media/svg-icons") },
+    { label: iconPack.title, url: url("one-plugin-media/svg-icons/edit/"~iconPack.id) },
+]
+%}
+
+{% block content %}
+
+    {{ actionInput('one-plugin-media/svg-icons/save') }}
+    {{ redirectInput('one-plugin-media/svg-icons') }}
+    {{ csrfInput() }}
+
+    {{ forms.textField({
+        size: "60",
+        first: true,
+        class: "code",
+        label: "Icon Pack Name"|t('one-plugin-media'),
+        instructions: "What this icon pack is called"|t('one-plugin-media'),
+        id: "packName",
+        name: "packName",
+        required:true,
+        value: iconPack.name ?? '',
+        autofocus: true,
+        errors: iconPack.getErrors("name"),
+    }) }} 
+    
+    <div id="icon-examples" class="upload__box">
+        
+        <div id="icons-field" class="field">
+            <div class="heading">
+                <label id="packName-label" for="packName">All Icons<span class="visually-hidden">Required</span><span class="required" aria-hidden="true"></span></label>
+            </div>
+            <div id="icons-instructions" class="instructions"><p>Preview all the icons here</p></div>
+            <div class="input ltr">
+                <div class="upload__img-wrap icons">
+                    {% for icon in icons %}
+                    <div class='premium'><div class='iicon op-svg-click'><svg style='width:100px;height:100px;'>{{icon.data|raw}}</svg></div><div style='z-index: 99;width:100%;text-align:center;''>{{icon.title}}</div><div class='bg'></div></div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}

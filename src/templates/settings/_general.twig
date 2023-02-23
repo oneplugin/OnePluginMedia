@@ -40,16 +40,32 @@
 
 <div class="matrixblock">
     <div class="titlebar" style="padding:5px 10px 5px 5px">
-        <div class="blocktype"><strong>SVG Icons - Default Colour Selection</strong><span class="info op-m-tooltip" style="vertical-align: middle !important;"><span class="tooltips">Select the default colour to prepopulate when you add a new Simple Vector Graphic (SVG) to your template.</span></span></div>
+        <div class="blocktype"><strong>SVG Icons - Default Colour Selection</strong><span class="info op-tooltip" style="vertical-align: middle !important;"><span class="tooltips">Select the default colour to prepopulate when you add a new Simple Vector Graphic (SVG) to your template.</span></span></div>
         <div class="preview"></div>
     </div>
+    {{ forms.textField({
+        label: 'Default Stroke Width(in %)',
+        id: 'animatedicon-svg-stroke-width',
+        name: 'settings[svgStrokeWidth]',
+        value: settings.svgStrokeWidth,
+        min: 1,
+        max: 100,
+        size: 1,
+        type: 'number'
+        })
+    }}
     {{ forms.hidden({
         name: "settings[svgStrokeColor]",
-        id: 'onepluginmedia-svg-color',
+        id: 'animatedicon-svg-color',
         value: settings.svgStrokeColor
     }) }}
 
     <div class="field">
+        <div class="instructions" id="pluginName-instructions">
+            <p>
+                Default Stroke Color  <span class="info op-tooltip" style="vertical-align: middle !important;"><span class="tooltips">Select the line/stroke colour for to be pre-populated, site wide.</span></span>
+            </p>
+        </div>
         <div class="animatedicon-color">
             <button id="svg-stroke-color" class="option" style="background-color: {{settings.svgStrokeColor}};" type="button">
             </button>
@@ -57,14 +73,91 @@
     </div>
 </div>
 
+<div class="matrixblock">
+    <div class="titlebar" style="padding:5px 10px 5px 5px">
+        <div class="blocktype"><strong>Image Optimization</strong></div>
+        <div class="preview"></div>
+    </div>
+    
+    {{ forms.lightswitchField({
+        label: "Allow Upscaling"|t('one-plugin-media'),
+        tip: "Enable to allow image upscaling, increasing image size may cause the image to appear low quality."|t('one-plugin-media'),
+        id: 'opUpscale',
+        name: 'settings[opUpscale]',
+        toggle: 'settings-opUpscale',
+        on: settings.opUpscale,
+        onLabel: "Enable."|t('one-plugin-media')
+    }) }}
+
+    {% set formatOptions = [
+        {label: 'Same as input', value: 'same'},
+        {label: 'WEBP --> Supports transparency and compression', value: 'webp'},
+        {label: 'JPEG --> Offers good compression', value: 'jpg'},
+        {label: 'PNG --> Preserves transparency', value: 'png'},
+    ] %}
+
+    {{ forms.selectField({
+        label: "Output File Type"|t('one-plugin-media'),
+        instructions: "",
+        id: 'outputFormat',
+        name: 'settings[opOutputFormat]',
+        options: formatOptions,
+        value: settings.opOutputFormat,
+        tip: "Select output file type to use for image optimization"|t('one-plugin-media')
+    }) }}
+
+    {% set tagOptions = [
+        {label: 'PICTURE --> Ideal when Output File Type is webp', value: 'picture'},
+        {label: 'IMG', value: 'img'}
+    ] %}
+
+    {{ forms.selectField({
+        label: "Output Tag"|t('one-plugin-media'),
+        instructions: "",
+        id: 'opImageTag',
+        name: 'settings[opImageTag]',
+        options: tagOptions,
+        value: settings.opImageTag,
+        tip: " Picture tag - Supports multiple image srcsets. Multiple image source sets (srcsets) will ensure images are displayed correctly by providing a set of jPEG images for older versions of Safari."|t('one-plugin-media'),
+        warning:'Webp is not supported by older versions of Safari. So if you have selected Output File Type as Webp, you should select PICTURE'
+    }) }}
+    
+    {{ forms.editableTableField({
+        label: "Profiles for Image Variants"|t('one-plugin-media'),
+        instructions: "",
+        id: 'profiles',
+        name: 'settings[opImageVariants]',
+        tip: "Specify the media break points to be used for generating optimized images. Image height will be calculated based on the aspect ratio."|t('one-plugin-media'),
+        cols: {
+            
+            opWidth: {
+                type: 'singleline',
+                heading: "Width (in pixels)"|t('one-plugin-media'),
+                info: "Only specify the width of the generated output image and the height will be caculated based on the aspect ratio."|t('one-plugin-media'),
+                placeholder: "Width of the generated output image"|t('one-plugin-media'),
+                code: false
+            },
+            opQuality: {
+                type: 'singleline',
+                heading: "Quality (in percentage)"|t('one-plugin-media'),
+                info: "Quality in percentage of the generated image"|t('one-plugin-media'),
+                code: false
+            },
+        }|filter,
+        rows:settings.opImageVariants,
+        staticRows: false,
+        errors: []|unique
+    }) }}
+</div>
+
 
 <script type="text/javascript">
     if (document.readyState === "interactive" || document.readyState === "complete") {
-        animatedIconsDOMLoaded();
+        domLoaded();
     } else {
-      document.addEventListener("DOMContentLoaded", animatedIconsDOMLoaded, true);
+      document.addEventListener("DOMContentLoaded", domLoaded, true);
     }
-    function animatedIconsDOMLoaded(){
+    function domLoaded(){
 
         $('#svg-stroke-color').spectrum({
             color: "{{settings.svgStrokeColor}}",
@@ -92,7 +185,7 @@
 
             },
             change: function(color) {
-                $('#onepluginmedia-svg-color').val(color.toHexString());
+                $('#animatedicon-svg-color').val(color.toHexString());
                 $('#svg-stroke-color').css('background-color',color.toHexString());
             },
             colorChange: function(color){

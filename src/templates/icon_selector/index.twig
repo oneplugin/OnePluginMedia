@@ -31,11 +31,6 @@
                                 <div class="icons">
 
                                 </div>
-                                <!--<div class="noicondiv">
-                                   <strong class="heading">No icons to show</strong>
-                                   <h2>Oppss, we can't find demanded icons</h2>
-                                   <a target="_blank" href="https://oneplugin.co" class="btn">Request new icon</a>
-                                </div>-->
                             </div>
                         </div>
                     </webdiv-library-icons>
@@ -50,21 +45,21 @@
                         <div class="preview">
                             <div class="icon">
                                 <webdiv class="icon-placeholder" trigger="loop" icon="editor-select-icon">
-                                    <div class="previcon op-svg-hover" id="previcon"></div>
+                                    <div class="previcon" id="previcon"><!--img src="images/icons/1.jpg" alt=""--></div>
                                 </webdiv>
                             </div>
                             <div class="actions">
                             </div>
                         </div>
                         <div class="content">
-                            <div class="lbl lbl-animation" style="margin-left:7px;">Animations</div>
+                            <div class="lbl lbl-animation" style="margin-left:7px;">Animation Trigger</div>
                             <select id="animated-icon-trigger">
-                                <option value="none" data-description="Loops for ever.">None</option>
-                                <option value="zoom" data-description="Loops for ever.">Zoom On Hover</option>
-                                <option value="pulse" data-description="Animates on hover">Pulse On Hover</option>
-                                <option value="shake" data-description="Loops for ever.">Shake On Hover</option>
-                                <option value="flip" data-description="Loops for ever.">Flip Y On Hover</option>
-                                <option value="flipX" data-description="Loops for ever.">Flip X On Hover</option>
+                                <option value="loop" data-description="Loops for ever.">Loop</option>
+                                <option value="hover" data-description="Animates on hover">Hover</option>
+                                <option value="click" data-description="Loops for ever.">Click</option>
+                                <option value="loop-on-hover" data-description="Loops for ever.">Loop on Hover</option>
+                                <option value="morph" data-description="Loops for ever.">Morph</option>
+                                <option value="morph-two-way" data-description="Loops for ever.">Morph two way</option>
                             </select>
                             <div class="editor">
                                 <div class="lbl">Colors</div>
@@ -94,10 +89,10 @@
                                 </div>
                             </div>
                         </div>
-                        {% if craft.config.devMode %}
+                        {% if devMode %}
                             <div class="btns" style="text-align:center;flex: 1;flex-basis: auto;margin:20px 0;">
                                 <button style="width:75%;margin-left:0px !important" type="button" class="btn-filter" id="copy-code" tabindex="0">Copy HTML Code</button>
-                                <span class="info op-m-tooltip" style="vertical-align: middle !important;"> <p>This option is not available in production environment</p></span>
+                                <span class="info op-tooltip" style="vertical-align: middle !important;"> <p>This option is not available in production environment</p></span>
                             </div>
                         {% endif %}
 

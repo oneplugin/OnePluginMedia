@@ -27,7 +27,7 @@
     depends: 'craft\\web\\assets\\cp\\CpAsset',
     position:3
 }) }}
-    {{ view.registerJsFile(assetsFolder ~ '/js/onepluginfields-lottie.min.js',{
+    {{ view.registerJsFile(assetsFolder ~ '/js/onepluginmedia-lottie.min.js',{
     depends: 'craft\\web\\assets\\cp\\CpAsset',
     position:3
 }) }}
@@ -47,4 +47,4 @@
 
     });
 {% endset %}
-{% includeJs partyJS %}
+{% js partyJS %}

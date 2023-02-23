@@ -1,0 +1,10 @@
+{% extends "_layouts/cp" %}
+
+{% set fullPageForm = true %}
+
+{% set crumbs = [
+    { label: settings.pluginName, url: url("one-plugin-media") },
+    { label: "SVG Icon Packs"|t("one-plugin-media"), url: url("one-plugin-media/svg-icons") },
+    { label: iconPack.title, url: url("one-plugin-media/svg-icons") },
+]
+%}

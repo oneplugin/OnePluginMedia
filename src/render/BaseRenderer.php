@@ -1,11 +1,12 @@
 <?php
+
 /**
  * OnePlugin Media plugin for Craft CMS 3.x
  *
- * Build a Craft CMS site with one field!
+ * OnePlugin Media lets the Craft community embed rich contents on their website
  *
- * @link      https://github.com/oneplugin/
- * @copyright Copyright (c) 2021 OnePlugin
+ * @link      https://github.com/oneplugin
+ * @copyright Copyright (c) 2022 The OnePlugin Team
  */
 
 namespace oneplugin\onepluginmedia\render;
@@ -18,19 +19,22 @@ use oneplugin\onepluginmedia\models\OnePluginMediaAsset;
 
 class BaseRenderer implements RenderInterface
 {
-    private $defaultSize = ["imageAsset" => ["width" => "100%","height" => "100%"],"svg" => ["width" => "256px","height" => "256px"]];
+    private $defaultSize = ["svg" => ["width" => "256px","height" => "256px"],"imageAsset" => ["width" => "100%","height" => "100%"]];
 
     public function render(OnePluginMediaAsset $asset, array $options): array{
 
         return [Html::tag('div', Craft::t('one-plugin-media', 'No renderer found for type ' . $asset->iconData['type'])),false];
     }
 
+    public function includeAssets(){
+        
+    }
     protected function normalizeOptionsForSize(OnePluginMediaAsset $asset,array $options){
 
         $options['size'] = empty($options['size']) ? false : $options['size'];
         if( $options['size'] ){
             if (empty($options['width'])){
-                $options['width'] = $this->defaultSize[$asset->asset['type']]['width'];
+                $options['width'] = $this->defaultSize[$asset->iconData['type']]['width'];
             }
             if (empty($options['height'])){
                 $options['height'] = $this->defaultSize[$asset->iconData['type']]['height'];
