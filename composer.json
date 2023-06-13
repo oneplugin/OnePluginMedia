@@ -2,7 +2,7 @@
     "name": "oneplugin/one-plugin-media",
     "description": "OnePlugin Media lets the Craft community embed rich contents on their website",
     "type": "craft-plugin",
-    "version": "1.0.0",
+    "version": "1.0.3",
     "keywords": [
         "craft",
         "cms",

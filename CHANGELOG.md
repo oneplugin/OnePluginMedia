@@ -15,3 +15,7 @@ Craft 4 Support
 ## 1.0.2 - 2021-10-14
 ### Changes
 Craft 4 Support
+
+## 1.0.3 - 2023-06-13
+### Changes
+Craft 4 Support
